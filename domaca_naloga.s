@@ -28,8 +28,10 @@ PRVI_DEL:
     subs r3, r3, #1
     beq _end
     ldrb r2, [r0, #1]!
+    @ Preveri za presledek
     cmp r2, #32
     bleq CHECK_SPACE
+    @ Shrani ce je non-whitespace char
     strneb r2, [r1, #1]!
     b PRVI_DEL
 
@@ -42,5 +44,9 @@ CHECK_SPACE:
     ldrb r2, [r0, #1]
     cmp r2, #32
     bls PRVI_DEL
+    @ Check if right is commenct
+    cmp r2, #64
+    beq PRVI_DEL
+    b r14
 
 _end: b _end
