@@ -7,10 +7,10 @@ izvorna_koda_pocisceno: .space 120
 
 tabela_oznak: .space 100
 
-@ r0 - izvorna_koda addres
-@ r1 - izvorna_koda_pocisceno
+@ r0 - izvorna_koda adress
+@ r1 - izvorna_koda_pocisceno adress
 @ r2 - current char
-@ r3 - last char above value 32
+@ r3 - counter
 
 .align
 .global _start
@@ -20,27 +20,27 @@ _start:
     adr r1, izvorna_koda_pocisceno
     sub r0, r0, #1
     sub r1, r1, #1
-    mov r3, #0
-
-CHECK_WHITESPACE:
-    cmp r3, #0 @ Check if last char is NULL
-    beq PRVI_DEL
-    mov r3, r2
-    cmp r3, #10 @ Check if new line
-    moveq r3, 0
-    b PRVI_DEL
-
+    @ Pripravi counter
+    mov r3, r1
+    sub r3, r3, #19
 
 PRVI_DEL:
+    subs r3, r3, #1
+    beq _end
     ldrb r2, [r0, #1]!
     cmp r2, #32
-    bls CHECK_WHITESPACE
-    strb r2, [r1, #1]!
-    adr r2, izvorna_koda_pocisceno
-    sub r2, r2, #1
-    cmp r2, r0
-    beq _end
+    bleq CHECK_SPACE
+    strneb r2, [r1, #1]!
     b PRVI_DEL
 
+CHECK_SPACE:
+    @ Check left
+    ldrb r2, [r0, #-1]
+    cmp r2, #32
+    bls PRVI_DEL
+    @ Check right
+    ldrb r2, [r0, #1]
+    cmp r2, #32
+    bls PRVI_DEL
 
 _end: b _end
