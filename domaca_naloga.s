@@ -17,6 +17,8 @@ tabela_oznak: .space 100
 .global _start
 _start:
 
+@ ----------- PRVI DEL -----------
+
     adr r0, izvorna_koda
     adr r1, izvorna_koda_pocisceno
     sub r0, r0, #1
@@ -30,7 +32,7 @@ PRVI_DEL:
     cmp r2, #10
     moveq r4, #0
     @ Preveri ce je komentar
-    cmp r2, #40
+    cmp r2, #64
     moveq r4, #1
     @ Skoci ce je state 1 (komentar)
     cmp r4, #1
@@ -41,7 +43,7 @@ PRVI_DEL:
     @ Shrani ce je non-whitespace char
     strb r2, [r1, #1]!
     cmp r0, r3
-    beq _end
+    beq DRUGI_DEL_INIT
     b PRVI_DEL
 
 CHECK_SPACE:
@@ -58,5 +60,10 @@ CHECK_SPACE:
     beq PRVI_DEL
     ldrb r2, [r0]
     mov pc, lr
+
+@ ----------- DRUGI DEL -----------
+
+DRUGI_DEL_INIT:
+
 
 _end: b _end
