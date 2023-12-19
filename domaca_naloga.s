@@ -3,6 +3,7 @@
 
 izvorna_koda: .asciz " \n\n stev1: .var 0xf123 @ komentar 1\n @prazna vrstica \n stev2: .var 15\nstev3: .var 128\n_start:\n mov r1, #5 @v r1 premakni 5\nmov r2, #1\nukaz3: add r1, #1\nb _start"
 
+.align
 izvorna_koda_pocisceno: .space 120
 
 tabela_oznak: .space 100
@@ -68,33 +69,38 @@ CHECK_SPACE:
 @ r0 - izvorna_koda adress
 @ r1 - izvorna_koda_pocisceno adress
 @ r2 - current char
-@ r3 - limiter for izvorna_koda read
+@ r3 - limiter for izvorna_koda_pocisceno read
 @ r4 - line state (0 - normal, 1 - start of line)
 
 DRUGI_DEL_INIT:
+    @ Pripravi counter (r1 se vedno vsebuje prejsnji najvecji naslov)
+    mov r3, r1
+    @ Get adresses
     adr r0, izvorna_koda
     adr r1, izvorna_koda_pocisceno
     sub r0, r0, #1
     sub r1, r1, #1
-    @ Pripravi counter
-    mov r3, r1
     @ Reset previous
     mov r2, #0
-    mov r4, #0
+    mov r4, #1
 
 DRUGI_DEL:
     ldrb r2, [r1, #1]!
     @ Preveri ce je LF
     cmp r2, #10
+    movne r4, #0
     bleq LF_CHECK
     @ Zapisi
+    strb r2, [r0, #1]!
+    cmp r1, r3
+    bne DRUGI_DEL
+    b _end
 
 LF_CHECK:
-    @ Preveri ce je 
+    @ Preveri ce je
     cmp r4, #1
-    bne DRUGI_DEL
-    cmp r2, #10
-    moveq r4, #0
+    beq DRUGI_DEL
+    mov r4, #1
     mov pc, lr
 
 _end: b _end
