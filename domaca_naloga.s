@@ -89,18 +89,32 @@ DRUGI_DEL:
     @ Preveri ce je LF
     cmp r2, #10
     movne r4, #0
-    bleq LF_CHECK
-    @ Zapisi
+    beq LF_CHECK
+    b ZAPISI_2
+
+ZAPISI_2:
     strb r2, [r0, #1]!
     cmp r1, r3
     bne DRUGI_DEL
-    b _end
+    b POCISTI_OSTALO
 
 LF_CHECK:
     @ Preveri ce je
     cmp r4, #1
     beq DRUGI_DEL
     mov r4, #1
-    mov pc, lr
+    b ZAPISI_2
+
+POCISTI_OSTALO:
+    mov r2, #0
+    adr r1, izvorna_koda_pocisceno
+    sub r1, r1, #1
+    b POCISTI_LOOP
+
+POCISTI_LOOP:
+    strb r2, [r0, #1]!
+    cmp r0, r1
+    bne POCISTI_LOOP
+    b _end
 
 _end: b _end
