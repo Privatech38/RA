@@ -6,6 +6,8 @@ izvorna_koda: .asciz " \n\n stev1: .var 0xf123 @ komentar 1\n @prazna vrstica \n
 .align
 izvorna_koda_pocisceno: .space 120
 
+.align
+
 tabela_oznak: .space 100
 
 @ r0 - izvorna_koda adress
