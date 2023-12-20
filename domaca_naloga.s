@@ -18,7 +18,7 @@ tabela_oznak: .space 100
 .global _start
 _start:
 
-@ ----------- PRVI DEL -----------^
+@ ----------- PRVI DEL -----------
 @ Ta del odstrani odvečne presledke in komentarje
 
     adr r0, izvorna_koda
@@ -106,6 +106,7 @@ LF_CHECK:
     b ZAPISI_2
 
 POCISTI_OSTALO:
+    mov r4, r0 @ Prestavi v r4 zato da tretji del ve kje preneha brati (ne bere NULL bitov)
     mov r2, #0
     adr r1, izvorna_koda_pocisceno
     sub r1, r1, #1
@@ -116,5 +117,28 @@ POCISTI_LOOP:
     cmp r0, r1
     bne POCISTI_LOOP
     b _end
+
+@ ----------- TRETJI DEL -----------
+@ Ta del izračuna tabelo oznak
+
+@ r0 - izvorna_koda adress
+@ r1 - tabela_oznak adress
+@ r2 - current char
+@ r3 - limiter for izvorna_koda read
+
+TRETJI_DEL_INIT:
+    @ Prepare adresses
+    adr r0, izvorna_koda
+    adr r1, tabela_oznak
+    sub r0, r0, #1
+    sub r1, r1, #1
+    @ Get limiter
+    mov r3, r4
+
+SEARCH_FOR_LABEL:
+    ldrb r2, [r0, #1]!
+    @ Poglej ce je :
+    cmp r2, #58
+
 
 _end: b _end
