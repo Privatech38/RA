@@ -127,6 +127,8 @@ POCISTI_LOOP:
 @ r1 - tabela_oznak adress
 @ r2 - current char
 @ r3 - limiter for izvorna_koda read
+@ r4 - word start index
+@ r6 - last tabela adress
 
 TRETJI_DEL_INIT:
     @ Prepare adresses
@@ -136,11 +138,40 @@ TRETJI_DEL_INIT:
     sub r1, r1, #1
     @ Get limiter
     mov r3, r4
+    mov r4, r0
+    mov r6, #0
 
 SEARCH_FOR_LABEL:
     ldrb r2, [r0, #1]!
     @ Poglej ce je :
     cmp r2, #58
+    beq DOLOCI_NASLOV_OZNAKE
+    @ Poglej ce je whitespace
+    cmp r2, #32
+    movls r4, r0
+    @ Poglej ce je vse prebral
+    cmp r0, r3
+    bne SEARCH_FOR_LABEL
+    b _end
+
+DOLOCI_NASLOV_OZNAKE:
+    mov r2, #39 @ Zapisi single quotation mark (')
+    strb r2, [r1, #1]!
+    sub r0, r0, #1
+    b ZAPISI_OZNAKO
+
+ZAPISI_OZNAKO:
+    ldrb r2, [r4, #1]!
+    strb r2, [r1, #1]!
+    @ Loop
+    cmp r4, r0
+    bne ZAPISI_OZNAKO
+    @ Zapisi '
+    mov r2, #39
+    strb r2, [r1, #1]!
+    mov r2, #0
+    strb r2, [r1, #1]!
+    b SEARCH_FOR_LABEL
 
 
 _end: b _end
