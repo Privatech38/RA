@@ -118,7 +118,7 @@ POCISTI_LOOP:
     strb r2, [r0, #1]!
     cmp r0, r1
     bne POCISTI_LOOP
-    b _end
+    b TRETJI_DEL_INIT
 
 @ ----------- TRETJI DEL -----------
 @ Ta del izračuna tabelo oznak
@@ -128,7 +128,7 @@ POCISTI_LOOP:
 @ r2 - current char
 @ r3 - limiter for izvorna_koda read
 @ r4 - word start index
-@ r6 - last tabela adress
+@ r5 - last tabela adress
 
 TRETJI_DEL_INIT:
     @ Prepare adresses
@@ -139,7 +139,8 @@ TRETJI_DEL_INIT:
     @ Get limiter
     mov r3, r4
     mov r4, r0
-    mov r6, #0
+    mov r5, #0
+    b SEARCH_FOR_LABEL
 
 SEARCH_FOR_LABEL:
     ldrb r2, [r0, #1]!
@@ -171,7 +172,7 @@ ZAPISI_OZNAKO:
     strb r2, [r1, #1]!
     mov r2, #0
     strb r2, [r1, #1]!
+    add r0, r0, #1
     b SEARCH_FOR_LABEL
-
 
 _end: b _end
