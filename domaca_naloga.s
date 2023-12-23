@@ -13,8 +13,7 @@ tabela_oznak: .space 100
 @ r0 - izvorna_koda adress
 @ r1 - izvorna_koda_pocisceno adress
 @ r2 - current char
-@ r3 - limiter for izvorna_koda read
-@ r4 - line state (0 - normal, 1 - comment)
+@ r3 - line state (0 - normal, 1 - comment)
 
 .align
 .global _start
@@ -27,26 +26,24 @@ _start:
     adr r1, izvorna_koda_pocisceno
     sub r0, r0, #1
     sub r1, r1, #1
-    @ Pripravi counter
-    mov r3, r1
 
 PRVI_DEL:
     ldrb r2, [r0, #1]!
     @ Preveri ce je LF
     cmp r2, #10
-    moveq r4, #0
+    moveq r3, #0
     @ Preveri ce je komentar
     cmp r2, #64
-    moveq r4, #1
+    moveq r3, #1
     @ Skoci ce je state 1 (komentar)
-    cmp r4, #1
+    cmp r3, #1
     beq PRVI_DEL
     @ Preveri za presledek
     cmp r2, #32
     bleq CHECK_SPACE
     @ Shrani ce je non-whitespace char
     strb r2, [r1, #1]!
-    cmp r0, r3
+    cmp r2, #0
     beq DRUGI_DEL_INIT
     b PRVI_DEL
 
@@ -71,12 +68,9 @@ CHECK_SPACE:
 @ r0 - izvorna_koda adress
 @ r1 - izvorna_koda_pocisceno adress
 @ r2 - current char
-@ r3 - limiter for izvorna_koda_pocisceno read
-@ r4 - line state (0 - normal, 1 - start of line)
+@ r3 - line state (0 - normal, 1 - start of line)
 
 DRUGI_DEL_INIT:
-    @ Pripravi counter (r1 se vedno vsebuje prejsnji najvecji naslov)
-    mov r3, r1
     @ Get adresses
     adr r0, izvorna_koda
     adr r1, izvorna_koda_pocisceno
@@ -84,31 +78,30 @@ DRUGI_DEL_INIT:
     sub r1, r1, #1
     @ Reset previous
     mov r2, #0
-    mov r4, #1
+    mov r3, #1
 
 DRUGI_DEL:
     ldrb r2, [r1, #1]!
     @ Preveri ce je LF
     cmp r2, #10
-    movne r4, #0
+    movne r3, #0
     beq LF_CHECK
     b ZAPISI_2
 
 ZAPISI_2:
     strb r2, [r0, #1]!
-    cmp r1, r3
+    cmp r2, #0
     bne DRUGI_DEL
     b POCISTI_OSTALO
 
 LF_CHECK:
-    @ Preveri ce je
-    cmp r4, #1
+    @ Preveri ce je LF in line state
+    cmp r3, #1
     beq DRUGI_DEL
-    mov r4, #1
+    mov r3, #1
     b ZAPISI_2
 
 POCISTI_OSTALO:
-    mov r4, r0 @ Prestavi v r4 zato da tretji del ve kje preneha brati (ne bere NULL bitov)
     mov r2, #0
     adr r1, izvorna_koda_pocisceno
     sub r1, r1, #1
@@ -126,9 +119,8 @@ POCISTI_LOOP:
 @ r0 - izvorna_koda adress
 @ r1 - tabela_oznak adress
 @ r2 - current char
-@ r3 - limiter for izvorna_koda read
-@ r4 - word start index
-@ r5 - last tabela adress
+@ r3 - word start index
+@ r4 - last tabela adress
 
 TRETJI_DEL_INIT:
     @ Prepare adresses
@@ -137,9 +129,8 @@ TRETJI_DEL_INIT:
     sub r0, r0, #1
     sub r1, r1, #1
     @ Get limiter
-    mov r3, r4
-    mov r4, r0
-    mov r5, #0
+    mov r3, r0
+    mov r4, #0
     b SEARCH_FOR_LABEL
 
 SEARCH_FOR_LABEL:
@@ -149,9 +140,9 @@ SEARCH_FOR_LABEL:
     beq DOLOCI_NASLOV_OZNAKE
     @ Poglej ce je whitespace
     cmp r2, #32
-    movls r4, r0
+    movls r3, r0
     @ Poglej ce je vse prebral
-    cmp r0, r3
+    cmp r2, #0
     bne SEARCH_FOR_LABEL
     b _end
 
@@ -162,10 +153,10 @@ DOLOCI_NASLOV_OZNAKE:
     b ZAPISI_OZNAKO
 
 ZAPISI_OZNAKO:
-    ldrb r2, [r4, #1]!
+    ldrb r2, [r3, #1]!
     strb r2, [r1, #1]!
     @ Loop
-    cmp r4, r0
+    cmp r3, r0
     bne ZAPISI_OZNAKO
     @ Zapisi '
     mov r2, #39
