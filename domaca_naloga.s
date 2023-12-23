@@ -168,6 +168,8 @@ ZAPISI_OZNAKO:
     strb r2, [r1, #1]!
     add r0, r0, #1
     @ Zapisi address
+    tst r1, #1
+    addeq r1, r1, #1
     strh r4, [r1, #1]!
     add r1, r1, #1
     b SEARCH_FOR_LABEL
