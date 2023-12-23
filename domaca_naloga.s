@@ -120,7 +120,7 @@ POCISTI_LOOP:
 @ r1 - tabela_oznak adress
 @ r2 - current char
 @ r3 - word start index
-@ r4 - last tabela adress
+@ r4 - oznaka adress
 
 TRETJI_DEL_INIT:
     @ Prepare adresses
@@ -135,6 +135,9 @@ TRETJI_DEL_INIT:
 
 SEARCH_FOR_LABEL:
     ldrb r2, [r0, #1]!
+    @ Poglej ce je newline
+    cmp r2, #10
+    addeq r4, r4, #1
     @ Poglej ce je :
     cmp r2, #58
     beq DOLOCI_NASLOV_OZNAKE
@@ -164,6 +167,9 @@ ZAPISI_OZNAKO:
     mov r2, #0
     strb r2, [r1, #1]!
     add r0, r0, #1
+    @ Zapisi address
+    strh r4, [r1, #1]!
+    add r1, r1, #1
     b SEARCH_FOR_LABEL
 
 _end: b _end
