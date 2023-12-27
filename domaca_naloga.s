@@ -82,10 +82,14 @@ DRUGI_DEL_INIT:
 
 DRUGI_DEL:
     ldrb r2, [r1, #1]!
+    @ Poglej ce je oznaka
+    cmp r2, #58
+    moveq r3, #3
+    beq ZAPISI_2
     @ Preveri ce je LF
     cmp r2, #10
-    movne r3, #0
     beq LF_CHECK
+    movne r3, #0
     b ZAPISI_2
 
 ZAPISI_2:
@@ -94,9 +98,15 @@ ZAPISI_2:
     bne DRUGI_DEL
     b POCISTI_OSTALO
 
+REPLACE_LF_SPACE:
+    mov r2, #32
+    strb r2, [r0, #1]!
+    b DRUGI_DEL
+
 LF_CHECK:
     @ Preveri ce je LF in line state
     cmp r3, #1
+    bhi REPLACE_LF_SPACE
     beq DRUGI_DEL
     mov r3, #1
     b ZAPISI_2
